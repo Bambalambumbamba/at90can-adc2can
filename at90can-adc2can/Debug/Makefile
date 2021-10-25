@@ -33,13 +33,14 @@ LINKER_SCRIPT_DEP:=
 
 # Every subdirectory with source files must be described here
 SUBDIRS :=  \
-../CAN
+../drivers \
+../drivers/can
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
-../CAN/can_drv.c \
-../CAN/can_lib.c \
+../drivers/can/can_drv.cpp \
+../drivers/can/can_lib.cpp \
 ../main.cpp
 
 
@@ -50,23 +51,23 @@ ASM_SRCS +=
 
 
 OBJS +=  \
-CAN/can_drv.o \
-CAN/can_lib.o \
+drivers/can/can_drv.o \
+drivers/can/can_lib.o \
 main.o
 
 OBJS_AS_ARGS +=  \
-CAN/can_drv.o \
-CAN/can_lib.o \
+drivers/can/can_drv.o \
+drivers/can/can_lib.o \
 main.o
 
 C_DEPS +=  \
-CAN/can_drv.d \
-CAN/can_lib.d \
+drivers/can/can_drv.d \
+drivers/can/can_lib.d \
 main.d
 
 C_DEPS_AS_ARGS +=  \
-CAN/can_drv.d \
-CAN/can_lib.d \
+drivers/can/can_drv.d \
+drivers/can/can_lib.d \
 main.d
 
 OUTPUT_FILE_PATH +=at90can-adc2can.elf
@@ -83,17 +84,17 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
-CAN/can_drv.o: ../CAN/can_drv.c
+drivers/can/can_drv.o: ../drivers/can/can_drv.cpp
 	@echo Building file: $<
 	@echo Invoking: AVR8/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=at90can64 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\gcc\dev\at90can64" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=at90can64 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\gcc\dev\at90can64" -c -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
-CAN/can_lib.o: ../CAN/can_lib.c
+drivers/can/can_lib.o: ../drivers/can/can_lib.cpp
 	@echo Building file: $<
 	@echo Invoking: AVR8/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=at90can64 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\gcc\dev\at90can64" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-g++.exe$(QUOTE) -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=at90can64 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.6.364\gcc\dev\at90can64" -c -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 

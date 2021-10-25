@@ -2,9 +2,9 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
-CAN\can_drv.c
+drivers\can\can_drv.cpp
 
-CAN\can_lib.c
+drivers\can\can_lib.cpp
 
 main.cpp
 

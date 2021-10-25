@@ -9,15 +9,16 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "CAN/can_lib.h"
 
-#define CAN_ID_ROOT = 0x400;
+#include "drivers/can/can_lib.h"
+
+
+#define CAN_ID_ROOT 0x400;
 
 uint8_t dato_misura[2]; //10 bit da inviare, invio 2 byte
 
 volatile int ingresso_adc = 0;
-
-
+volatile st_cmd_t messaggio_can; //dichiaro struttura messaggio_can
 
 
 
@@ -26,7 +27,6 @@ int main(void)
 {
 	cli();
 	
-	st_cmd_t messaggio_can; //dichiaro struttura messaggio_can
 	
 	//init CAN
 	
@@ -53,6 +53,7 @@ int main(void)
     }
 	
 }
+
 
 ISR (ADC_vect){
 	messaggio_can.id.std = CAN_ID_ROOT + ingresso_adc;
