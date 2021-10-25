@@ -5,41 +5,37 @@
  * Author : samu_vanno
  */ 
 
-#define F_CPU 16000000UL;
+#define CAN_ID_MEASURE 0x316;
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-
-#include "drivers/can/can_lib.h"
-
-
-#define CAN_ID_ROOT 0x400;
+#include "libraries/avr_can/avr_can.h"
 
 uint8_t dato_misura[2]; //10 bit da inviare, invio 2 byte
 
 volatile int ingresso_adc = 0;
-volatile st_cmd_t messaggio_can; //dichiaro struttura messaggio_can
-
-
-
+volatile CAN_FRAME frame_misura[8]; //dichiaro struttura messaggio_can
 
 int main(void)
 {
 	cli();
 	
+	for (int i=0, i<8, i++) {
+		frame_misura[i].id = CAN_ID_MEASURE + i;
+		frame_misura[i].extended = false;
+		frame_misura[i].priority = 0;
+		frame_misura[i].length = 2;
+	}
 	
-	//init CAN
+    DDRF |= (1 << PF4); // set PF4 to OUTPUT
+    PORTF &= ~(1 << PF4); // set PF4 to LOW
 	
-	messaggio_can.pt_data = &dato_misura[0]; //punta a indirizzo della roba da inviare - FORSE NECESSARIO BIT REVERSAL
-	messaggio_can.ctrl.ide = 0; //messaggio CAN standard (no extended)
-	messaggio_can.dlc = 2; //numero byte da mandare - lo stesso di dato_misura
-	messaggio_can.id.std  = CAN_ID_ROOT; //id, da ridefinire meglio probabilmente
-	messaggio_can.cmd = CMD_TX_DATA; //configura message object
-	
+	Can0.begin(CAN_BPS_1000K);
+		
 	//init ADC
 	
-	ADMUX = (1<<REFS1)|(1<<REFS0); //impostata VREF bandgap @ 2.56V
-	ADCSRA = (1<<ADIE);//per avviare conversione, aggiungere ADEN e ADSC 
+	ADMUX = (1<<REFS1)|(1<<REFS0);				//impostata VREF bandgap @ 2.56V
+	ADCSRA = (1<<ADIE);							//per avviare conversione, aggiungere ADEN e ADSC 
 	ADCSRA = (1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); //prescaler a 128
 	
 	sei();
@@ -48,18 +44,16 @@ int main(void)
 	
     while (1) 
     {
-		dato_misura[0] = ADCL;
-		dato_misura[1] = ADCH;
+		uint16_t dato_misura = ((uint16_t)ADCH << 8) | ADCL;
     }
 	
 }
 
 
 ISR (ADC_vect){
-	messaggio_can.id.std = CAN_ID_ROOT + ingresso_adc;
-	if (ingresso_adc < 7)
-		ingresso_adc++;
-	else ingresso_adc = 0;
+	frame_misura[ingresso_adc].data.s0 = dato_misura;
+	Can0.sendFrame(frame_misura[ingresso_adc]);
+	ingresso_adc = (ingresso_adc < 7) ? ingresso_adc++ : 0;
 };
 
 //ISR (ADC_vect)  {
