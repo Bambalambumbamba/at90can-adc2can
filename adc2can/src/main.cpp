@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "../lib/avr_can/avr_can.h"
+#include "avr_can/avr_can.h"
 
 #define CAN_ID_MISURA_ROOT    0x316
 
