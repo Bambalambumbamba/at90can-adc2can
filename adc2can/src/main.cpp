@@ -9,7 +9,7 @@ volatile uint16_t dato_misura; //10 bit da inviare, invio 2 byte
 int ingresso_adc;
 CAN_FRAME frame_misura[8]; //dichiaro struttura messaggio_can
 
-int main(void)
+[[noreturn]]int main(void)
 {
 	cli();
 	
@@ -44,9 +44,10 @@ int main(void)
 	
 }
 
-
+/*
 ISR (ADC_vect){
 	frame_misura[ingresso_adc].data.s0 = dato_misura;
 	Can0.sendFrame(frame_misura[ingresso_adc]);
 	ingresso_adc = (ingresso_adc < 7) ? ingresso_adc++ : 0;
 };
+*/
