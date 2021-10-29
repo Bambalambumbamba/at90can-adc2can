@@ -1,12 +1,19 @@
-#ifndef GF_BYTEORDER
-#define GF_BYTEORDER
+/*
+ * byteorder.h
+ *
+ * Author : gfabiano
+ */ 
 
-#include <stdint.h>
+
+#ifndef byteorder_h
+#define byteorder_h
 
 #ifndef CANBUS_BYTE_ORDER
 #define CANBUS_BYTE_ORDER __ORDER_BIG_ENDIAN__
 #endif
 
+
+// Fast in hardware byteorder swap for canbus
 namespace byteorder
 {
     // can(bus) to host long
@@ -14,8 +21,10 @@ namespace byteorder
     uint32_t ctohl(uint32_t t_val)
     {
         #if CANBUS_BYTE_ORDER == __ORDER_BIG_ENDIAN__
-        t_val = ((t_val & 0xff000000) >> 24) | ((t_val &0x00ff0000) >> 8) |
-                ((t_val & 0x0000ff00) << 8) | ((t_val &0x000000ff) << 24);
+        asm( "rev %1, %0"
+             : "=r" (t_val)
+             : "r"  (t_val)
+        );
         #endif
         return t_val;
     }
@@ -23,12 +32,14 @@ namespace byteorder
     // host to can(bus) long
     constexpr auto htocl = ctohl;
 
+
     // can(bus) to host short
     inline
     uint16_t ctohs(uint16_t t_val)
     {
         #if CANBUS_BYTE_ORDER == __ORDER_BIG_ENDIAN__
-        t_val = ((t_val & 0xff00) >> 8) | ((t_val &0x00ff) << 8);
+			uint8_t tmp = (t_val >> 8) & 0xff;
+			t_val = (t_val << 8) | tmp;
         #endif
         return t_val;
     }
@@ -38,3 +49,4 @@ namespace byteorder
 }
 
 #endif
+

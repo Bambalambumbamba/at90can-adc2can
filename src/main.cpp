@@ -1,64 +1,37 @@
-#include <avr/interrupt.h>
 #include <util/delay.h>
+#include <avr/io.h>
+
 #include "avr_can/avr_can.h"
-#include "./byteorder.h"
+#include "adc/adc_drv.h"
+#include "byteorder.h"
 
-#define CAN_ID_MISURA_ROOT    0x316
+#define INPUT_NUMBER 2
+#define CAN_ROOT_ID 0x300
 
-//volatile uint16_t misura; //10 bit da inviare, invio 2 byte
 
-// CAN_FRAME test_interrupt; 
+int main(void){
 
-/*
-ISR (ADC_vect){
-	misura = (ADCH * 2^8) + ADCL;
-	test_interrupt.data.s0 = misura;
-	Can0.sendFrame(test_interrupt);
+    Can0.setBigEndian(true);
+
+    CAN_FRAME measure_frame[INPUT_NUMBER];
+    for (int c = 0; c < INPUT_NUMBER-1; c++){
+        measure_frame[c].id = (CAN_ROOT_ID + c);
+        measure_frame[c].extended =  false;
+        measure_frame[c].priority = 0;
+        measure_frame[c].length = 2;
+    }
+
+    adc_init(EXTERNAL_AREF, false, 0);
+
+    Can0.begin(CAN_BPS_1000K);
+
+    int selected_pin = 0;
+    uint16_t measurement;
+
+    while(true){
+        measurement = adc_single_conversion(selected_pin);
+        measure_frame[selected_pin].data.s0 = byteorder::htocs(measurement);
+        Can0.sendFrame(measure_frame[selected_pin]);
+        selected_pin = (selected_pin < (INPUT_NUMBER - 1)) ? selected_pin+1 : 0;
+    }
 }
-*/
-
-int main(void)
-{
-	cli();
-	DDRF |= (1 << PF4); // set PF4 to OUTPUT
-	PORTF &= ~(1 << PF4); // set PF4 to LOW
-/*
-	test_interrupt.id = CAN_ID_MISURA_ROOT;
-	test_interrupt.extended = false;
-	test_interrupt.priority = 0;
-	test_interrupt.length = 2;
-
-	ADMUX = (1<<REFS1)|(1<<REFS0);				//impostata VREF bandgap @ 2.56V
-	ADCSRA = (1<<ADIE);							//imposta interrupt: per avviare conversione, aggiungere ADEN e ADSC 
-	ADCSRA = (1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);  //prescaler a 128
-	ADCSRA |= (1<<ADEN) | (1<<ADSC);	
-*/
-
-
-	CAN_FRAME dummy1;
-	dummy1.id = 0x100;
-	dummy1.extended = 0;
-	dummy1.priority = 0;
-	dummy1.length =1;
-	dummy1.data.bytes[0] = 0x00;
-
-	CAN_FRAME dummy2;
-	dummy2.id = 0x101;
-	dummy2.extended = 0;
-	dummy2.priority = 0;
-	dummy2.length =1;
-	dummy2.data.bytes[0] = 0x01;
-
-	Can0.begin(CAN_BPS_1000K);
-
-	sei();
-
-	while(1){
-		Can0.sendFrame(dummy1);
-		_delay_ms(100);
-		Can0.sendFrame(dummy2);
-		_delay_ms(100);
-	}
-}
-
-
